@@ -1,0 +1,319 @@
+# -*- coding: utf-8 -*-
+
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import messagebox
+
+okno = Tk()
+okno.title("Kalkulator kredytowy")
+okno.geometry('680x640')
+okno.resizable(False, False)
+
+label5 = Label(okno,font=('Century Gothic',12,'bold'), text="Kalkulator kredytowy")
+label5.grid(column=2, row=0)
+
+label6 = Label(okno,font=('Century Gothic',10), text="Podany kalkulator kredytowy oblicza ratę kredytu dla wybranych opcji. \nMinimalna kwota kredytu to 100zł, a maksymalna 10000000zł. \nDo każdego kredytu doliczana jest prowizja w wysokości 10% od kwoty \nzaciągniętego kredytu oraz ubezpieczenie, które wynosi 5% kwoty kredytu.")
+label6.grid(column=2, row=1)
+
+label = Label(okno, width=5)
+label.grid(column=0, row=3)
+
+label1 = Label(okno)
+label1.grid(column=0, row=3)
+
+kwota_kredytu = Label(okno, font=('Century Gothic',10,'bold'), text="Kwota kredytu:")
+kwota_kredytu.grid(column=1, row=4)
+
+kwota = Entry(okno, width=63)
+kwota.grid(column=2, row=4)
+
+rodzaj_kredytu = Label(okno, font=('Century Gothic',10,'bold'), text="Rodzaj kredytu:")
+rodzaj_kredytu.grid(column=1, row=5)
+
+kredyt = Combobox(okno, width=60, state='readonly')
+kredyt['values'] = ("","Kredyt gotówkowy", "Kredyt samochodowy", "Kredyt mieszkaniowy")
+kredyt.current(0)
+kredyt.grid(column=2, row=5)
+
+ilosc = Label(okno, font=('Century Gothic',10,'bold'), text="Ilość rat:")
+ilosc.grid(column=1, row=6)
+
+ilosc_rat = Combobox(okno, width=60, state='readonly')
+ilosc_rat.grid(column=2, row=6)
+
+rodzaj_rat = Label(okno, font=('Century Gothic',10,'bold'), text="Rodzaj rat:")
+rodzaj_rat.grid(column=1, row=7)
+
+raty = Combobox(okno, width=60, state='readonly')
+raty['values'] = ("","Równe", "Malejące")
+raty.current(0)
+raty.grid(column=2, row=7)
+
+def raty_rowne(k,d,e):                                                          # k-kwota kredytu, d-oprocentowanie kredytu, e-ilosc rat
+
+    kapital1=[]
+    odsetki=0
+    odsetki1=[]
+    ratakapitalowa1=[]
+    q=0
+    rata=0
+    prowizja=0
+
+    prowizja = k * 0.1 + k * 0.05
+    k += prowizja
+
+    q = 1 + 1/12 * d / 100
+    rata = (k*(q**e))*((q-1)/(q**e-1))
+
+    kapital1.append(k)
+    odsetki1.append(kapital1[0] * d / 100 / 12)
+    ratakapitalowa1.append(rata - odsetki1[0])
+
+    for i in range(0,e+1):
+
+        kapital1.append(kapital1[i] - ratakapitalowa1[i])
+        odsetki1.append(kapital1[i+1] * d / 100 / 12)
+        ratakapitalowa1.append(rata - odsetki1[i+1])
+
+        odsetki += odsetki1[i]
+
+    for j in range(0,e+1):
+
+        rata = round(rata, 2)
+        kapital1[j] = round(kapital1[j], 2)
+        odsetki1[j] = round(odsetki1[j], 2)
+        ratakapitalowa1[j] = round(ratakapitalowa1[j], 2)
+
+        my_tree.insert("", 'end', text ="L1",
+                        values =(j, abs(kapital1[j]), abs(ratakapitalowa1[j]), abs(odsetki1[j]), abs(rata)))
+
+    k = k + odsetki
+    k = round(k, 2)
+
+    tree.insert("", 'end', text="L1", values=("Kwota kredytu:", kwota.get() + " zł"))
+    tree.insert("", 'end', text="L1", values=("Rodzaj kredytu:", kredyt.get()))
+    tree.insert("", 'end', text="L1", values=("Oprocentowanie kredytu:", str(d) + "%"))
+    tree.insert("", 'end', text="L1", values=("Prowizja + ubezpieczenie:", str(prowizja) + " zł"))
+    tree.insert("", 'end', text="L1", values=("Całkowity koszt kredytu:", str(k) + " zł"))
+    tree.insert("", 'end', text="L1", values=("Ilość rat:", e))
+    tree.insert("", 'end', text="L1", values=("Rodzaj rat:", raty.get()))
+
+
+def raty_malejace(l,n,p):                                                       # l-kwota kredytu, n-oprocentowanie, p-ilosc rat
+
+    kapital1=[]
+    odsetki=0
+    odsetki1=[]
+    ratakapitalowa1=[]
+    ratak=0
+    prowizja=0
+
+    prowizja = l * 0.1 + l * 0.05
+    l += prowizja
+
+    ratak=l/p
+
+    kapital1.append(l)
+    odsetki1.append(kapital1[0] * n / 100 / 12)
+    ratakapitalowa1.append(ratak + odsetki1[0])
+
+    for i in range(0,p+1):
+
+        kapital1.append(kapital1[i] - ratak)
+        odsetki1.append(kapital1[i+1] * n / 100 / 12)
+        ratakapitalowa1.append(ratak + odsetki1[i+1])
+
+        odsetki += odsetki1[i]
+
+    for j in range(0,p+1):
+        ratak = round(ratak, 2)
+        kapital1[j] = round(kapital1[j], 2)
+        odsetki1[j] = round(odsetki1[j], 2)
+        ratakapitalowa1[j] = round(ratakapitalowa1[j], 2)
+
+        my_tree.insert("", 'end', text ="L1",
+                            values =(j, abs(kapital1[j]), abs(ratak), abs(odsetki1[j]), abs(ratakapitalowa1[j])))
+
+    l = l + odsetki
+    l = round(l, 2)
+
+    tree.insert("", 'end', text="L1", values=("Kwota kredytu:", kwota.get() + " zł"))
+    tree.insert("", 'end', text="L1", values=("Rodzaj kredytu:", kredyt.get()))
+    tree.insert("", 'end', text="L1", values=("Oprocentowanie kredytu:", str(n) + "%"))
+    tree.insert("", 'end', text="L1", values=("Prowizja + ubezpieczenie:", str(prowizja) + " zł"))
+    tree.insert("", 'end', text="L1", values=("Całkowity koszt kredytu:", str(l) + " zł"))
+    tree.insert("", 'end', text="L1", values=("Ilość rat:", p))
+    tree.insert("", 'end', text="L1", values=("Rodzaj rat:", raty.get()))
+
+
+def callbackFunc(event):
+
+    if  kredyt.get() == "Kredyt gotówkowy":
+
+        ilosc_rat['values']=("","10","20","30")
+
+    elif kredyt.get() == "Kredyt samochodowy":
+
+        ilosc_rat['values']=("","24","36","48")
+
+    elif kredyt.get() == "Kredyt mieszkaniowy":
+
+        ilosc_rat['values']=("","120","240","360")
+
+kredyt.bind("<<ComboboxSelected>>", callbackFunc)
+
+label2=Label(okno, text="")
+label2.grid(column=2, row=8)
+
+my_tree = Treeview(okno, selectmode='none', height=7)
+verscrlbar = Scrollbar(okno,
+                        orient ="vertical",
+                        command = my_tree.yview)
+verscrlbar.grid(column=3, row=9, sticky="ns")
+my_tree.configure(yscrollcommand = verscrlbar.set)
+verscrlbar.config(command = my_tree.yview)
+my_tree.grid(column=2, row=9)
+my_tree['columns']=("1","2","3","4","5")
+my_tree['show'] = 'headings'
+
+my_tree.column("1", width=30, anchor='c')
+my_tree.column("2", width=115, anchor='se')
+my_tree.column("3", width=115, anchor='se')
+my_tree.column("4", width=115, anchor='se')
+my_tree.column("5", width=115, anchor='se')
+
+my_tree.heading("1", text="Nr")
+my_tree.heading("2", text="Kapitał")
+my_tree.heading("3", text="Rata kapitałowa")
+my_tree.heading("4", text="Odsetki")
+my_tree.heading("5", text="Rata")
+
+tree = Treeview(okno, show='tree', selectmode='none', height=7)
+tree.grid(column=2, row=13)
+tree['columns']=("1","2")
+tree['show'] = 'headings'
+
+tree.column("#1", anchor='w')
+tree.column("#2", anchor='e')
+
+tree.heading("#1", text="Informacje o", anchor='e')
+tree.heading("#2", text="wybranym kredycie", anchor='w')
+
+style = Style()
+style.configure("Treeview.Heading", font=('Century Gothic', 10, 'bold'))
+
+style = Style()
+style.configure("Treeview.Column", font=('Century Gothic', 10, 'bold'))
+
+def clicked():
+
+    tree.delete(*tree.get_children())
+    my_tree.delete(*my_tree.get_children())
+    r=0
+    a=0
+
+    try:
+        s = float(kwota.get())
+
+        if s<100 or s>10000000:
+
+            messagebox.showerror('Kwota kredytu', 'Podaj poprawną kwotę kredytu. Powinna być od 100zł do 10mln zł.')
+
+        else:
+
+            if kredyt.get() == "Kredyt gotówkowy" or kredyt.get() == "Kredyt samochodowy" or kredyt.get() == "Kredyt mieszkaniowy":
+
+                if ilosc_rat.get() == '10' or ilosc_rat.get() == '20' or ilosc_rat.get() == '30' or ilosc_rat.get() == '24' or ilosc_rat.get() == '36' or ilosc_rat.get() == '48' or ilosc_rat.get() == '120' or ilosc_rat.get() == '240' or ilosc_rat.get() == '360':
+
+                    a=int(ilosc_rat.get())
+
+                    if raty.get() == "Równe" or raty.get() == "Malejące":
+
+                        if kredyt.get() == "Kredyt gotówkowy":
+
+                            r=15
+
+                            if a == 10 or a == 20 or a == 30:
+
+                                if raty.get() == "Równe":
+
+                                    raty_rowne(s,r,a)
+
+                                elif raty.get() == "Malejące":
+
+                                    raty_malejace(s,r,a)
+
+                            else:
+                                messagebox.showerror('Ilość rat','Wybierz poprawna ilość rat z podanych.')
+
+                        elif kredyt.get() == "Kredyt samochodowy":
+
+                            if s<1000 or s>10000000:
+
+                                messagebox.showerror('Kwota kredytu', 'Podaj poprawną kwotę kredytu. Powinna być od 1000zł do 10mln zł.')
+
+                            else:
+
+                                r=10
+
+                                if a == 24 or a == 36 or a == 48:
+
+                                    if raty.get() == "Równe":
+
+                                        raty_rowne(s,r,a)
+
+                                    elif raty.get() == "Malejące":
+
+                                        raty_malejace(s,r,a)
+
+                                else:
+                                    messagebox.showerror('Ilość rat','Wybierz poprawna ilość rat z podanych.')
+
+                        elif kredyt.get() == "Kredyt mieszkaniowy":
+
+                            if s<10000 or s>10000000:
+
+                                messagebox.showerror('Kwota kredytu', 'Podaj poprawną kwotę kredytu. Powinna być od 10000zł do 10mln zł.')
+
+                            else:
+
+                                r=5
+
+                                if a == 120 or a == 240 or a == 360:
+
+                                    if raty.get() == "Równe":
+
+                                        raty_rowne(s,r,a)
+
+                                    elif raty.get() == "Malejące":
+
+                                        raty_malejace(s,r,a)
+
+                                else:
+                                    messagebox.showerror('Ilość rat','Wybierz poprawna ilość rat z podanych.')
+
+                        else:
+                            messagebox.showerror('Rodzaj kredytu', 'Wybierz rodzaj kredytu z podanych.')
+
+                    else:
+                        messagebox.showerror('Rodzaj rat', 'Wybierz rodzaj rat z podanych.')
+
+                else:
+                    messagebox.showerror('Ilość rat','Wybierz ilość rat z podanych.')
+
+            else:
+                messagebox.showerror('Rodzaj kredytu','Wybierz rodzaj kredytu z podanych.')
+
+    except ValueError:
+        messagebox.showerror('Kwota kredytu', 'Podaj poprawną kwotę kredytu.')
+
+label3=Label(okno, text="")
+label3.grid(column=2, row=10)
+
+oblicz = Button(okno, text="Oblicz", width=40, command=clicked)
+oblicz.grid(column=2, row=11)
+
+label4=Label(okno, text="")
+label4.grid(column=2, row=12)
+
+okno.mainloop()
